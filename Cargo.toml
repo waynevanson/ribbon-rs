@@ -1,2 +1,2 @@
 [workspace]
-members = ["framework", "examples/*"]
+members = ["framework"]
