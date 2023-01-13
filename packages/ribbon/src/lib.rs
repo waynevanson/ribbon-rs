@@ -1,7 +1,4 @@
-extern crate web_sys;
-
 pub mod component;
-pub mod html;
 pub mod index_dimensional;
 pub mod node;
 
