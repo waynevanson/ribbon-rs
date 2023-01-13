@@ -27,8 +27,7 @@ impl IndexDimensional {
     pub fn decrement_step_mut(&mut self) -> Option<&Self> {
         self.inner
             .last_mut()
-            .map(|x| x)
-            .filter(|&&mut last| last > 0)
+            .filter(|last| **last > 0)
             .map(|last| *last -= 1)?;
 
         Some(self)
