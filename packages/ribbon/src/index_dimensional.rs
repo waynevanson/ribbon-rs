@@ -1,8 +1,8 @@
-use std::slice::Iter;
+use std::slice::{Iter, IterMut};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct IndexDimensional {
-    inner: Vec<usize>,
+    pub inner: Vec<usize>,
 }
 
 impl IndexDimensional {
@@ -36,6 +36,16 @@ impl IndexDimensional {
     pub fn iter<'a>(&'a self) -> Iter<'a, usize> {
         self.into_iter()
     }
+
+    pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, usize> {
+        self.into_iter()
+    }
+}
+
+impl From<Vec<usize>> for IndexDimensional {
+    fn from(inner: Vec<usize>) -> Self {
+        IndexDimensional { inner }
+    }
 }
 
 impl<'a> IntoIterator for &'a IndexDimensional {
@@ -44,6 +54,15 @@ impl<'a> IntoIterator for &'a IndexDimensional {
 
     fn into_iter(self) -> Iter<'a, usize> {
         self.inner.iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a mut IndexDimensional {
+    type Item = &'a mut usize;
+    type IntoIter = IterMut<'a, usize>;
+
+    fn into_iter(self) -> IterMut<'a, usize> {
+        self.inner.iter_mut()
     }
 }
 
