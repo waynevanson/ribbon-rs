@@ -35,6 +35,15 @@ impl IndexDimensional {
     }
 
     pub fn iter<'a>(&'a self) -> Iter<'a, usize> {
+        self.into_iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a IndexDimensional {
+    type Item = &'a usize;
+    type IntoIter = Iter<'a, usize>;
+
+    fn into_iter(self) -> Iter<'a, usize> {
         self.inner.iter()
     }
 }
