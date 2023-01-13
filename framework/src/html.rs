@@ -55,15 +55,16 @@ impl From<HtmlNode> for VNode {
 }
 
 pub struct HtmlRender {
-    document: Document,
-    element: Element,
+    pub document: Document,
+    pub element: Element,
 }
 
 impl HtmlRender {
     pub fn new(document: Document, element: Element) -> Self {
         HtmlRender { document, element }
     }
-    pub fn paint(&self, vnode: VNode) -> () {
+
+    pub fn paint(&mut self, vnode: VNode) -> () {
         let mut element_by_vnode_index: HashMap<IndexDimensional, Element> = Default::default();
 
         // transform the vnode to a html element
