@@ -4,92 +4,89 @@ use std::collections::HashMap;
 use tag::HtmlTag;
 use web_sys::{Document, Element};
 
-#[derive(Clone)]
-pub struct HtmlNode {
-    pub tag: HtmlTag,
-    pub attrs: HashMap<String, String>,
-    pub children: Vec<Self>,
+pub enum Node {
+    Text(String),
+    Element {
+        tag: HtmlTag,
+        attrs: HashMap<String, String>,
+        children: Vec<Self>,
+    },
 }
 
-impl HtmlNode {
+impl Node {
+    pub fn text<S: ToString>(test: S) -> Self {
+        Self::Text(test.to_string())
+    }
+
     pub fn div() -> Self {
-        HtmlNode {
+        Node::Element {
             tag: HtmlTag::Div,
             attrs: Default::default(),
             children: Default::default(),
         }
     }
-
-    pub fn attrs<T>(&mut self, attributes: T) -> &Self
-    where
-        T: IntoIterator<Item = (String, String)>,
-    {
-        for (property, value) in attributes {
-            self.attrs.insert(property, value);
-        }
-
-        self
-    }
 }
 
-impl From<HtmlNode> for VNode {
-    fn from(html_node: HtmlNode) -> Self {
-        Self::Element {
-            tag: html_node.tag.to_string(),
-            attributes: html_node.attrs,
-            children: html_node.children.into_iter().map(|x| x.into()).collect(),
+impl From<Node> for VNode {
+    fn from(node: Node) -> Self {
+        match node {
+            Node::Element {
+                tag,
+                attrs,
+                children,
+            } => Self::Element {
+                tag: tag.to_string(),
+                attributes: attrs,
+                children: children.into_iter().map(|x| x.into()).collect(),
+            },
+            Node::Text(value) => Self::Text { value },
         }
     }
 }
 
 pub struct HtmlRender {
-    pub document: Document,
-    pub element: Element,
+    document: Document,
+    element: Element,
+    nodes_by_vnode_index: HashMap<IndexDimensional, web_sys::Node>,
 }
 
 impl HtmlRender {
     pub fn new(document: Document, element: Element) -> Self {
-        HtmlRender { document, element }
+        HtmlRender {
+            document,
+            element,
+            nodes_by_vnode_index: Default::default(),
+        }
+    }
+
+    fn find_closest_parent(&self, index: IndexDimensional) -> &web_sys::Node {
+        index
+            .parents()
+            .map(|parents| parents.into_iter().rev().collect::<Vec<_>>())
+            .and_then(|parents| {
+                parents.iter().fold(None, |acc, index| {
+                    acc.or(self.nodes_by_vnode_index.get(index))
+                })
+            })
+            .unwrap_or(&self.element)
     }
 
     pub fn paint(&mut self, vnode: VNode) -> () {
-        let mut element_by_vnode_index: HashMap<IndexDimensional, Element> = Default::default();
+        vnode.into_iter().for_each(|(index, vnode)| {
+            let parent = self.find_closest_parent(index.clone());
 
-        // transform the vnode to a html element
-        // keep track of current parent, and a hashmap of Index to HtmlNode values
-        //
-        // For each vnode, we check to see how we can attach it to the body
-        // If VNODE::Element, create a HTML element and append it to the parent.
-        // if VNODE::Text, set the parents' children to this text.
-        //
-        // main problem is how to effectively find the correct parent element.
-        // always available.
-        // look up closest parent from currently mounted maps
-        for (index, vnode) in vnode.iter_with_index() {
-            let parent = element_by_vnode_index.get(&index).unwrap_or(&self.element);
-
-            match vnode {
-                VNode::Text { value } => {
-                    parent.set_inner_html(value);
-                }
-                VNode::Element {
-                    tag,
-                    attributes,
-                    children: _,
-                } => {
-                    let element = self.document.create_element(tag).unwrap();
-
-                    for (name, value) in attributes {
-                        element.set_attribute(name, value).unwrap();
-                    }
-
-                    parent.append_child(&element).unwrap();
-
-                    element_by_vnode_index.insert(index, element);
-                }
+            let node: web_sys::Node = match vnode {
+                VNode::Text { value } => self.document.create_text_node(value).into(),
+                VNode::Element { tag, .. } => self
+                    .document
+                    .create_element(&tag.to_string())
+                    .unwrap()
+                    .into(),
             };
-        }
 
-        // parent already in body, no need to inject it.
+            parent.append_child(&node).unwrap();
+
+            self.nodes_by_vnode_index.insert(index.clone(), node);
+        });
     }
 }

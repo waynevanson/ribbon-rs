@@ -33,12 +33,44 @@ impl IndexDimensional {
         Some(self)
     }
 
+    pub fn decrement_depth_mut(&mut self) -> Option<&Self> {
+        let len = self.inner.len();
+        if len == 0 {
+            None
+        } else {
+            self.inner.truncate(len - 1);
+            Some(self)
+        }
+    }
+
     pub fn iter<'a>(&'a self) -> Iter<'a, usize> {
         self.into_iter()
     }
 
     pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, usize> {
         self.into_iter()
+    }
+
+    // None it has no parents.
+    pub fn parents(mut self) -> Option<Vec<Self>> {
+        let x = self.decrement_depth_mut()?;
+        let q = x
+            .clone()
+            .inner
+            .iter()
+            .try_fold(vec![x.clone()], |mut acc, _| {
+                let index = acc
+                    .last()
+                    .cloned()
+                    .and_then(|mut index| index.decrement_depth_mut().cloned());
+
+                index.map(|index| {
+                    acc.push(index);
+                    acc
+                })
+            });
+
+        q
     }
 }
 
