@@ -66,18 +66,26 @@ mod test {
 
     #[test]
     fn should_iterate_values_in_order() {
-        let element = VNode::element(
+        let one = VNode::text("one");
+        let four = VNode::text("four");
+        let three = VNode::Element {
+            tag: "three".to_string(),
+            attributes: Default::default(),
+            children: vec![],
+        };
+        let two = VNode::element("tag", [("c".to_string(), "d".to_string())], [three, four]);
+        let zero = VNode::element(
             "first",
             [("one".to_string(), "two".to_string())],
-            vec![VNode::text("child")],
+            [one, two],
         );
 
-        let indicies = element
+        let indicies = zero
             .iter_with_index()
             .map(|(index, _)| index)
             .collect::<Vec<_>>();
 
-        let expected = vec![vec![], vec![0]]
+        let expected = vec![vec![], vec![0], vec![1], vec![1, 0], vec![1, 1]]
             .into_iter()
             .map(|x| x.into())
             .collect::<Vec<_>>();
