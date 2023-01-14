@@ -1,8 +1,8 @@
 mod iter;
-use crate::index_dimensional::IndexDimensional;
-use std::collections::HashMap;
 
 use self::iter::DepthIterWithIndex;
+use crate::index_dimensional::IndexDimensional;
+use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
 pub enum VNode {

@@ -1,20 +1,8 @@
+pub mod tag;
 use ribbon::{index_dimensional::IndexDimensional, prelude::*};
 use std::collections::HashMap;
+use tag::HtmlTag;
 use web_sys::{Document, Element};
-
-#[derive(Clone, PartialEq)]
-pub enum HtmlTag {
-    Div,
-}
-
-impl ToString for HtmlTag {
-    fn to_string(&self) -> String {
-        match self {
-            Self::Div => "div",
-        }
-        .to_string()
-    }
-}
 
 #[derive(Clone)]
 pub struct HtmlNode {
