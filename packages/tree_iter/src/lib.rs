@@ -1,3 +1,5 @@
+use std::iter::FusedIterator;
+
 pub trait ToChildren
 where
     Self: Sized,
@@ -24,12 +26,6 @@ where
 {
     type Item = &'a A;
 
-    //add depth to the place
-    //
-    // go back to parent and look into next child
-    // repeat until at parent.
-    // when last of indexmap returns none, we are at parent.
-    // and done
     fn next(&mut self) -> Option<Self::Item> {
         let next = self
             .depths
@@ -53,3 +49,5 @@ where
         Some(next)
     }
 }
+
+impl<'a, A> FusedIterator for DepthFirstSearchIter<'a, A> where A: ToChildren {}
