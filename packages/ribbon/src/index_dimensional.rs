@@ -68,9 +68,9 @@ impl IndexDimensional {
                     acc.push(index);
                     acc
                 })
-            });
+            })?;
 
-        q
+        q.into_iter().rev().collect::<Vec<Self>>().into()
     }
 }
 
@@ -155,6 +155,37 @@ mod test {
             let result = data.increment_step_mut();
 
             let expected = None;
+
+            assert_eq!(result, expected);
+        }
+    }
+
+    mod parents {
+        use super::*;
+
+        #[test]
+        fn should_return_none_when_node_is_root() {
+            let index: IndexDimensional = vec![].into();
+            let result = index.parents();
+            let expected = None;
+
+            assert_eq!(result, expected);
+        }
+
+        #[test]
+        fn should_return_some_when_node_is_child() {
+            let index: IndexDimensional = vec![4, 0, 8, 3, 4].into();
+            let result = index.parents();
+            let expected = Some(
+                vec![
+                    vec![].into(),
+                    vec![4].into(),
+                    vec![4, 0].into(),
+                    vec![4, 0, 8].into(),
+                    vec![4, 0, 8, 3].into(),
+                ]
+                .into(),
+            );
 
             assert_eq!(result, expected);
         }

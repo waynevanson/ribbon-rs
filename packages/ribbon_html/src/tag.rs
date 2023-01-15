@@ -4,4 +4,5 @@ use strum::Display;
 #[strum(serialize_all = "kebab-case")]
 pub enum HtmlTag {
     Div,
+    Button,
 }

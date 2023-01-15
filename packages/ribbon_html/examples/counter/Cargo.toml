@@ -1,0 +1,17 @@
+[package]
+name = "example_ribbon_html_counter"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+path = "src/rs/lib.rs"
+crate-type = ["cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+js-sys = "0.3.60"
+ribbon = { path = "../../../ribbon", version = "*" }
+ribbon_html = { path = "../../", version = "*" }
+wasm-bindgen = "0.2.83"
+web-sys = { version = "0.3.60", features = ["Window", "Element", "Node", "HtmlElement", "Document", "console"] }

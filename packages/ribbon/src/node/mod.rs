@@ -54,3 +54,16 @@ impl VNode {
         }
     }
 }
+
+pub trait ToVNode {
+    fn to_vnode(self) -> VNode;
+}
+
+impl<T> ToVNode for T
+where
+    T: Into<VNode>,
+{
+    fn to_vnode(self) -> VNode {
+        self.into()
+    }
+}

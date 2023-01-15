@@ -27,6 +27,5 @@ pub fn main() {
 
     let mut renderer = HtmlRender::new(document, body.into());
     let vnode = HelloWorld.view().into();
-
     renderer.paint(vnode);
 }
