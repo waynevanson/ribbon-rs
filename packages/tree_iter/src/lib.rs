@@ -11,14 +11,21 @@ where
     }
 }
 
-pub type Breadth = usize;
+type Breadth = usize;
 
 pub struct DepthFirstSearchIter<'a, A> {
     root: &'a A,
-    depths: Vec<(&'a A, Breadth)>,
+    // parents that are in the middle of iterating children, including root
+    // does not include parents that are at the last child.
+    unfinished: Vec<(&'a A, Breadth)>,
 }
 
 // go to current by getting to the deepest
+
+enum Message<'a, A> {
+    Depth { value: &'a A },
+    Breadth,
+}
 
 impl<'a, A> Iterator for DepthFirstSearchIter<'a, A>
 where
@@ -28,23 +35,38 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         let next = self
-            .depths
+            .unfinished
             .last()
             .map(|value| value.0)
-            .unwrap_or(&self.root);
+            .unwrap_or_else(|| {
+                self.unfinished.push((&self.root, 0));
+                &self.root
+            });
 
-        next.nth_child(0)
-            .map(|child| self.depths.push((child, 0)))
-            .or_else(|| {
-                self.depths
-                    .iter()
-                    .map(|value| *value)
-                    .enumerate()
-                    .rfold(None, |accumulator, (index, (parent, breadth))| {
-                        accumulator.or(parent.nth_child(breadth).map(|_| index))
-                    })
-                    .map(|index| self.depths.truncate(index))
-            })?;
+        let message = next
+            .nth_child(0)
+            // if we can go deeper, add that node to list of unfinished.
+            .map(|child| Message::Depth { value: child })
+            .unwrap_or(Message::Breadth);
+
+        match message {
+            Message::Depth { value } => {
+                self.unfinished.push((&value, 0));
+            }
+            Message::Breadth => {
+                self.unfinished.truncate(self.unfinished.len() - 1);
+                let (node, breadth) = self.unfinished.last_mut().unwrap();
+                let len = node.to_children().unwrap().len();
+
+                let is_last = *breadth == len - 1;
+
+                if is_last {
+                    self.unfinished.truncate(self.unfinished.len() - 1);
+                } else {
+                    *breadth += 1;
+                }
+            }
+        }
 
         Some(next)
     }
