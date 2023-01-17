@@ -1,4 +1,4 @@
-use crate::node::VNode;
+use crate::vnode::VNode;
 
 pub trait Stateless<T>
 where

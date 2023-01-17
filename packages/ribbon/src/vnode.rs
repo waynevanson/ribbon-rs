@@ -1,7 +1,5 @@
-mod iter;
-
-use self::iter::DepthIterWithIndex;
 use crate::index_dimensional::IndexDimensional;
+use graph::prelude::*;
 use std::collections::HashMap;
 
 #[derive(Debug, PartialEq)]
@@ -16,7 +14,29 @@ pub enum VNode {
     },
 }
 
+impl Graph<usize> for VNode {
+    fn edge_count(&self) -> usize {
+        self.children()
+            .map(|vnodes| vnodes.iter().map(|vnode| vnode.edge_count()).sum())
+            .unwrap_or(0)
+    }
+
+    fn node_count(&self) -> usize {
+        1 + self
+            .children()
+            .map(|vnodes| vnodes.iter().map(|vnode| vnode.node_count()).sum())
+            .unwrap_or(0)
+    }
+}
+
 impl VNode {
+    pub fn children(&self) -> Option<&[Self]> {
+        match self {
+            Self::Text { value: _ } => None,
+            Self::Element { children, .. } => Some(children.as_slice()),
+        }
+    }
+
     pub fn text(str: &str) -> Self {
         Self::Text {
             value: str.to_string(),
@@ -43,27 +63,10 @@ impl VNode {
             .try_fold(self, |vnode, indice| vnode.child(*indice))
     }
 
-    pub fn iter_with_index<'a>(&'a self) -> DepthIterWithIndex<'a> {
-        self.into_iter()
-    }
-
     pub fn child(&self, indice: usize) -> Option<&Self> {
         match self {
             VNode::Text { value: _ } => None,
             VNode::Element { children, .. } => children.iter().nth(indice),
         }
-    }
-}
-
-pub trait ToVNode {
-    fn to_vnode(self) -> VNode;
-}
-
-impl<T> ToVNode for T
-where
-    T: Into<VNode>,
-{
-    fn to_vnode(self) -> VNode {
-        self.into()
     }
 }

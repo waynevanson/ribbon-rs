@@ -82,41 +82,14 @@ impl HtmlRender {
         }
     }
 
-    pub fn paint(&mut self, vnode: VNode) -> () {
-        vnode.into_iter().for_each(|(index, vnode)| {
-            let parent = find_closest_parent(index.clone(), &self.nodes_by_vnode_index)
-                .unwrap_or(&self.element);
-
-            let node: web_sys::Node = match vnode {
-                VNode::Text { value } => self.document.create_text_node(value).into(),
-                VNode::Element { tag, .. } => self
-                    .document
-                    .create_element(&tag.to_string())
-                    .unwrap()
-                    .into(),
-            };
-
-            console::log_1(&JsValue::from_str(&format!("{:?}", index.clone())));
-
-            console::log_1(&JsValue::from_str(&format!(
-                "{:?}",
-                self.nodes_by_vnode_index.clone()
-            )));
-
-            parent.append_child(&node).unwrap();
-
-            self.nodes_by_vnode_index.insert(index.clone(), node);
-        });
-    }
+    pub fn paint(&mut self, vnode: VNode) -> () {}
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
-
-    use ribbon::index_dimensional::IndexDimensional;
-
     use crate::find_closest_parent;
+    use ribbon::index_dimensional::IndexDimensional;
+    use std::collections::HashMap;
 
     #[test]
     fn should_lookup_right_element() {

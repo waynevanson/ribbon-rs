@@ -2,3 +2,7 @@
 name = "ribbon"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+graph = "0.3.0"
+nonempty = "0.8.1"
