@@ -54,5 +54,7 @@ impl HtmlRender {
         HtmlRender { document, element }
     }
 
-    pub fn paint(&mut self, vnode: VNode) -> () {}
+    pub fn paint(&mut self, vnode: VNode) -> () {
+        // add a graph to this
+    }
 }
