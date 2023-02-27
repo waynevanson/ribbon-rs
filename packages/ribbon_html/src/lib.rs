@@ -34,11 +34,11 @@ impl From<Node> for VNode {
                 tag,
                 attrs,
                 children,
-            } => Self::Element {
-                tag: tag.to_string(),
-                attributes: attrs,
-                children: children.into_iter().map(|x| x.into()).collect(),
-            },
+            } => Self::Element(
+                tag.to_string(),
+                attrs,
+                children.into_iter().map(|x| x.into()).collect(),
+            ),
             Node::Text(value) => Self::Text { value },
         }
     }

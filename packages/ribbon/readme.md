@@ -44,10 +44,10 @@ impl Counter {
         ).into()
     }
 
-    fn update(&self, message: Self::Message) -> Self {
+    fn update(&mut self, message: Self::Message) -> Self {
         match message {
-            Increment => self.count + add,
-            Decrement => self.count - minus,
+            Increment => self.count += 1,
+            Decrement => self.count -= 1,
         }
     }
 }
@@ -73,3 +73,16 @@ fn main() {
     app.render()
 }
 ```
+
+## Notes
+
+Could do something complicated like we do for serde. Ser and De.
+
+FromNode ToNode, don't think so.
+
+Data model
+
+Text
+Element
+Portal?
+Fragment

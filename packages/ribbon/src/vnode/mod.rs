@@ -1,14 +1,30 @@
+/// `VNode`'s hold all the information need for a render.
+/// This includes attributes, callbacks and refs.
 use graph::prelude::*;
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq, Clone)]
+// I don't think we want to care about size becuase it makes our lives more difficult.
+enum Attribute {
+    Callback(Box<dyn FnOnce()>),
+    // I mean this thing can be any kind of value
+    String(String),
+    Number(usize),
+    Boolean(bool),
+}
+
+// how to do environments?
+// some nodes don't need environments, default to ().
+
 pub enum VNode {
     Text {
         value: String,
     },
     Element {
         tag: String,
-        attributes: HashMap<String, String>,
+        attributes: HashMap<String, Attribute>,
+        children: Vec<VNode>,
+    },
+    Fragment {
         children: Vec<VNode>,
     },
 }
@@ -80,13 +96,15 @@ impl VNode {
     }
 }
 
-// plan is to use these to perform diffs and
-impl<'a> From<&'a VNode> for DirectedCsrGraph<usize, &'a VNode, ()> {
+pub type VNodeGraph<'a> = DirectedCsrGraph<usize, &'a VNode, ()>;
+
+// plan is to use these to perform diffs.
+impl<'a> From<&'a VNode> for VNodeGraph<'a> {
     fn from(vnode: &'a VNode) -> Self {
         let (edges, nodes) = vnode.for_graph();
 
         GraphBuilder::new()
-            .csr_layout(CsrLayout::Sorted)
+            .csr_layout(CsrLayout::Deduplicated)
             .edges(edges)
             .node_values(nodes)
             .build()
@@ -94,10 +112,17 @@ impl<'a> From<&'a VNode> for DirectedCsrGraph<usize, &'a VNode, ()> {
 }
 
 impl VNode {
-    pub fn children(&self) -> &[Self] {
+    pub fn tag(&self) -> Option<&str> {
         match self {
-            Self::Text { value: _ } => [].as_slice(),
-            Self::Element { children, .. } => children.as_slice(),
+            VNode::Element { tag, .. } => Some(tag),
+            _ => None,
+        }
+    }
+
+    pub fn children(&self) -> &Vec<VNode> {
+        match &self {
+            Self::Text { value: _ } => &Vec::new(),
+            Self::Element { children, .. } => children,
         }
     }
 
@@ -121,11 +146,25 @@ impl VNode {
         }
     }
 
+    pub fn fragment(children: Vec<VNode>) -> Self {
+        Self::Fragment { children }
+    }
+
     pub fn child(&self, indice: usize) -> Option<&Self> {
-        match self {
+        match &self {
             VNode::Text { value: _ } => None,
             VNode::Element { children, .. } => children.iter().nth(indice),
         }
+    }
+}
+
+pub trait ToVNode {
+    fn to_vnode(self) -> VNode;
+}
+
+impl ToVNode for VNode {
+    fn to_vnode(self) -> VNode {
+        self
     }
 }
 

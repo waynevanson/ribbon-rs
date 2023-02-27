@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+derive_builder = "0.12.0"
 graph = "0.3.0"
 nonempty = "0.8.1"
