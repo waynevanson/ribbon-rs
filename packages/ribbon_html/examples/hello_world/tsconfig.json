@@ -1,4 +1,0 @@
-{
-  "compilerOptions": { "strict": true },
-  "exclude": ["src/rs"]
-}
