@@ -11,10 +11,6 @@ enum Attribute {
     Number(usize),
     Boolean(bool),
 }
-
-// how to do environments?
-// some nodes don't need environments, default to ().
-
 pub enum VNode {
     Text {
         value: String,
@@ -132,29 +128,8 @@ impl VNode {
         }
     }
 
-    pub fn element<C, T, A, S>(tag: &str, attributes: A, children: C) -> Self
-    where
-        C: IntoIterator<Item = T>,
-        T: Into<Self>,
-        A: IntoIterator<Item = S>,
-        S: Into<(String, String)>,
-    {
-        Self::Element {
-            tag: tag.to_string(),
-            attributes: attributes.into_iter().map(|x| x.into()).collect(),
-            children: children.into_iter().map(|x| x.into()).collect(),
-        }
-    }
-
     pub fn fragment(children: Vec<VNode>) -> Self {
         Self::Fragment { children }
-    }
-
-    pub fn child(&self, indice: usize) -> Option<&Self> {
-        match &self {
-            VNode::Text { value: _ } => None,
-            VNode::Element { children, .. } => children.iter().nth(indice),
-        }
     }
 }
 
