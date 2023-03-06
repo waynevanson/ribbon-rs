@@ -1,16 +1,6 @@
 use std::marker::PhantomData;
 
-use crate::{environment::Environment, references::References, state::State};
-
-pub trait ToNode {
-    type Environment;
-}
-
-pub trait View: Environment + Sized {
-    type Node: ToNode<Environment = Self::Environment>;
-
-    fn view<F>(&self, dispatcher: Dispatcher<Self>) -> Self::Node;
-}
+use crate::components::{references::References, state::State};
 
 pub struct Dispatcher<T> {
     marker: PhantomData<T>,
